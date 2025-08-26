@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offline - AI Chat Interface</title>
+    <meta name="description" content="You are currently offline. The AI Chat Interface will be available when your connection is restored.">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background: linear-gradient(135deg, 
+                hsl(220, 15%, 99%) 0%, 
+                hsl(220, 15%, 96%) 50%,
+                hsl(220, 10%, 94%) 100%
+            );
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #374151;
+            line-height: 1.6;
+        }
+        
+        .offline-container {
+            text-align: center;
+            padding: 3rem 2rem;
+            max-width: 480px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 
+                0 20px 25px -5px rgba(0, 0, 0, 0.1),
+                0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        .offline-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 2rem;
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .wifi-icon {
+            width: 40px;
+            height: 40px;
+            fill: white;
+        }
+        
+        h1 {
+            color: #1f2937;
+            margin-bottom: 1rem;
+            font-weight: 700;
+            font-size: 2rem;
+            letter-spacing: -0.025em;
+        }
+        
+        .subtitle {
+            color: #6b7280;
+            margin-bottom: 1.5rem;
+            font-size: 1.125rem;
+            font-weight: 500;
+        }
+        
+        .description {
+            color: #6b7280;
+            margin-bottom: 2.5rem;
+            line-height: 1.7;
+            font-size: 0.95rem;
+        }
+        
+        .actions {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .button {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            padding: 0.875rem 1.75rem;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 14px 0 rgba(99, 102, 241, 0.3);
+        }
+        
+        .button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px 0 rgba(99, 102, 241, 0.4);
+        }
+
+        .button:active {
+            transform: translateY(0);
+        }
+
+        .button-secondary {
+            background: rgba(107, 114, 128, 0.1);
+            color: #4b5563;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+        }
+
+        .button-secondary:hover {
+            background: rgba(107, 114, 128, 0.15);
+            box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.15);
+        }
+        
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.75rem;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            border-radius: 12px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #dc2626;
+            margin-bottom: 1.5rem;
+        }
+
+        .status-indicator.online {
+            background: rgba(34, 197, 94, 0.1);
+            border-color: rgba(34, 197, 94, 0.2);
+            color: #16a34a;
+        }
+        
+        .offline-tips {
+            text-align: left;
+            background: rgba(249, 250, 251, 0.8);
+            border: 1px solid rgba(229, 231, 235, 0.8);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .offline-tips h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #374151;
+        }
+
+        .offline-tips ul {
+            list-style: none;
+            space-y: 0.5rem;
+        }
+
+        .offline-tips li {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .offline-tips li:before {
+            content: "•";
+            color: #6366f1;
+            font-weight: bold;
+            margin-top: 0.125rem;
+        }
+
+        @keyframes pulse {
+            0%, 100% { 
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% { 
+                transform: scale(1.05);
+                opacity: 0.9;
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .offline-container {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        /* Dark mode support */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background: linear-gradient(135deg, 
+                    hsl(220, 15%, 8%) 0%, 
+                    hsl(220, 15%, 12%) 50%,
+                    hsl(220, 15%, 10%) 100%
+                );
+                color: #f3f4f6;
+            }
+
+            .offline-container {
+                background: rgba(31, 41, 55, 0.8);
+                border-color: rgba(75, 85, 99, 0.3);
+            }
+
+            h1 {
+                color: #f9fafb;
+            }
+
+            .offline-tips {
+                background: rgba(31, 41, 55, 0.6);
+                border-color: rgba(75, 85, 99, 0.3);
+            }
+
+            .offline-tips h3 {
+                color: #f3f4f6;
+            }
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 640px) {
+            .offline-container {
+                margin: 1rem;
+                padding: 2rem 1.5rem;
+            }
+
+            h1 {
+                font-size: 1.75rem;
+            }
+
+            .actions {
+                gap: 0.75rem;
+            }
+
+            .button {
+                padding: 0.75rem 1.5rem;
+                font-size: 0.925rem;
+            }
+        }
+
+        /* Reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+            .offline-icon {
+                animation: none;
+            }
+            
+            .offline-container {
+                animation: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="offline-container">
+        <div class="offline-icon">
+            <svg class="wifi-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.07 2.93 1 9z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M5 13l2 2c2.76-2.76 7.24-2.76 10 0l2-2C15.73 9.73 8.27 9.73 5 13z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M9 17l2 2c.87-.87 2.13-.87 3 0l2-2C14.24 15.24 9.76 15.24 9 17z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="12" cy="20" r="1" fill="currentColor"/>
+                <line x1="1" y1="1" x2="23" y2="23" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+        </div>
+        
+        <h1>You're Offline</h1>
+        <p class="subtitle">No Internet Connection</p>
+        <p class="description">
+            Your device is not connected to the internet. Some features of the AI Chat Interface 
+            may not be available until your connection is restored.
+        </p>
+
+        <div id="connection-status" class="status-indicator">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                <circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="2"/>
+                <path d="M8 4v4l3 3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            <span>Checking connection...</span>
+        </div>
+        
+        <div class="actions">
+            <button class="button" onclick="checkConnection()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M23 4v6h-6"/>
+                    <path d="M1 20v-6h6"/>
+                    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+                </svg>
+                Retry Connection
+            </button>
+            <button class="button button-secondary" onclick="window.location.reload()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
+                    <path d="M21 3v5h-5"/>
+                    <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>
+                    <path d="M8 16H3v5"/>
+                </svg>
+                Reload Page
+            </button>
+        </div>
+
+        <div class="offline-tips">
+            <h3>While you wait:</h3>
+            <ul>
+                <li>Check your WiFi or mobile data connection</li>
+                <li>Try moving to an area with better signal</li>
+                <li>Restart your router if using WiFi</li>
+                <li>Contact your internet provider if issues persist</li>
+                <li>Some cached content may still be available</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Connection status monitoring
+        let retryCount = 0;
+        const maxRetries = 5;
+        
+        function updateConnectionStatus(isOnline) {
+            const statusEl = document.getElementById('connection-status');
+            
+            if (isOnline) {
+                statusEl.className = 'status-indicator online';
+                statusEl.innerHTML = `
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                        <path d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"/>
+                    </svg>
+                    <span>Connection restored! Redirecting...</span>
+                `;
+                
+                // Redirect to main app after short delay
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 2000);
+            } else {
+                statusEl.className = 'status-indicator';
+                statusEl.innerHTML = `
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                        <circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="2"/>
+                        <path d="M8 4v4l3 3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                    <span>Still offline...</span>
+                `;
+            }
+        }
+
+        async function checkConnection() {
+            const statusEl = document.getElementById('connection-status');
+            statusEl.innerHTML = `
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M23 4v6h-6"/>
+                    <path d="M1 20v-6h6"/>
+                    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+                </svg>
+                <span>Checking connection...</span>
+            `;
+
+            try {
+                // Test connection with a simple request
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 5000);
+                
+                const response = await fetch('/', {
+                    method: 'HEAD',
+                    mode: 'no-cors',
+                    signal: controller.signal
+                });
+                
+                clearTimeout(timeoutId);
+                updateConnectionStatus(true);
+                retryCount = 0;
+            } catch (error) {
+                retryCount++;
+                updateConnectionStatus(false);
+                
+                if (retryCount < maxRetries) {
+                    setTimeout(checkConnection, 2000 * retryCount); // Exponential backoff
+                }
+            }
+        }
+
+        // Monitor online/offline events
+        window.addEventListener('online', () => {
+            console.log('Connection restored');
+            updateConnectionStatus(true);
+        });
+
+        window.addEventListener('offline', () => {
+            console.log('Connection lost');
+            updateConnectionStatus(false);
+        });
+
+        // Check connection status on load
+        window.addEventListener('load', () => {
+            updateConnectionStatus(navigator.onLine);
+            
+            if (!navigator.onLine) {
+                // Start periodic connection checks
+                checkConnection();
+            }
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'r' && (e.ctrlKey || e.metaKey)) {
+                e.preventDefault();
+                checkConnection();
+            } else if (e.key === 'F5') {
+                e.preventDefault();
+                window.location.reload();
+            }
+        });
+
+        // Service Worker messaging
+        if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+            navigator.serviceWorker.addEventListener('message', function(event) {
+                if (event.data.type === 'CACHE_UPDATED') {
+                    console.log('Cache updated, some content may be available offline');
+                }
+            });
+        }
+
+        // Performance monitoring for offline page
+        if ('performance' in window) {
+            window.addEventListener('load', function() {
+                setTimeout(() => {
+                    const loadTime = performance.now();
+                    console.log(`Offline page loaded in ${loadTime.toFixed(2)}ms`);
+                }, 0);
+            });
+        }
+    </script>
+</body>
+</html>
